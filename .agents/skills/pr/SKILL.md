@@ -1,6 +1,6 @@
 ---
 name: pr
-description: "Use when writing a PR body."
+description: "Use when writing or updating a PR body."
 metadata:
   credits:
     skill: show-me
@@ -9,162 +9,54 @@ metadata:
     url: "https://github.com/humanlayer/skills/blob/main/plugins/show-me/skills/show-me/SKILL.md"
 ---
 
-Use this template for writing the PR body:
+Write a PR description the owner can understand from the PR itself. Follow the project's `AGENTS.md` for audience and writing style. Write PR headings in Russian. Use the project's domain terms from `DOMAIN.md`. This skill covers the PR description. Follow the user's request for any publication or delivery actions.
 
-```markdown
-## Summary
+## Draft the description
 
-<diagram, diff-sketch, or tree>
+1. Read the actual diff, the linked issue or spec, the recorded checks, and any available review findings. Follow the tracker and writing guidance linked from `AGENTS.md` where it applies.
+2. Lead with the problem, the resulting behavior, and the affected scope. Use a concrete example when it helps. For diagrams, visual evidence, or formatting beyond the template, read the relevant section of [PRESENTATION.md](PRESENTATION.md).
+3. Summarize what the evidence confirms and state material limits in the visible text. Put exact commands, detailed results, and checked revisions in a disclosure when the detail would interrupt reading.
+4. State any decision or manual check the owner needs to make. Include the action, expected result, and reason. If no further check is needed and the section would help the owner, briefly explain why.
+5. State the consequences and how to roll back. Identify any irreversible effects, material uncertainty, or deviations from requirements. Inspect the rendered result where available.
 
-## Evidence
+## Suggested structure
 
-- **Before:** <screenshot/output/failing test run>
-  **After:** <screenshot/output/passing test run>
+Adapt the template to the size of the change. Omit empty sections and replace all placeholders. Include agent attribution if the project requires it.
 
-## Merge Danger
+````markdown
+## Что изменилось
 
-**Door:** <one-way or two-way>
+<проблема, новое поведение и затронутые сценарии>
 
-<optional: description>
+## Проверки
 
-**Blast Radius:** <one-word description>
+<фактический результат и важные ограничения>
 
-<optional: potential ramifications of merge>
-```
+<details>
+<summary>Подробности проверок</summary>
 
-## Sections
+Проверенная версия — <постоянная ссылка на коммит или локальные изменения, если коммита ещё нет>.
+База сравнения — <SHA, если использовали базовый коммит>.
 
-Skip all preambles and keep prose brief. Use the user's domain language from `DOMAIN.md`.
+| Проверка | Результат | Что подтверждает |
+| --- | --- | --- |
+| <команда или ручное действие> | <фактический результат> | <что проверено и какие есть ограничения> |
 
-### Summary
+</details>
 
-Pick the smallest view that makes the key point clear.
+## Что нужно сделать владельцу
 
-- Show logic or an algorithm as pseudocode:
+<действие или решение, ожидаемый результат и причина>
 
-```text
-on(save)
-  if content is unchanged
-    return cached result
-  write new content
-  return fresh result
-```
+## Риски и откат
 
-- Show runtime control flow as a call tree:
+<последствия, возможность отката и порядок действий>
+````
 
-```text
-submitForm
-  createSession
-    persistPrompt
-    launchAgent
-  navigateToSession
-```
+## Evidence and owner actions
 
-- Show UI structure as a component tree, including state and module boundaries that matter:
-
-```text
-<SessionPage> (apps/example/src/routes/session.tsx)
-  useSessionEvents()
-  <SessionToolbar>
-    <RunSkillButton> (packages/ui)
-```
-
-- Show file responsibility or a broad refactor as a shallow file tree:
-
-```text
-src/
-├── commands/       # parses user actions
-├── sessions/       # owns session state
-└── transport/      # sends API requests
-```
-
-- Show component interaction, control flow, or data flow with Mermaid:
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant UI
-    participant Daemon
-    User->>UI: choose command
-    UI->>Daemon: send expanded prompt
-    Daemon-->>UI: stream result
-```
-
-- Use `diff` when the point is what changes and the surrounding shape already exists. Match the diff shape to the topic.
-
-For a component change:
-
-```diff
- <SessionPage>
-   useSessionEvents()
-   <SessionToolbar>
-+    <RunSkillButton />
-   <SessionTimeline>
-+    <SkillResultCard />
-```
-
-For a file-layout change:
-
-```diff
- src/
- ├── commands/
-+│   └── show-me.ts       # expands the slash command
- ├── sessions/
--└── transport.ts
-+└── transport/
-+    ├── client.ts
-+    └── stream.ts
-```
-
-For a call-tree or call-stack change:
-
-```diff
- submitForm
-   createSession
-     persistPrompt
-+    expandSkillMention
-     launchAgent
--  navigateToSession
-+  navigateToSession
-+    subscribeToEvents
-```
-
-For a state or control-flow change:
-
-```diff
- on(save)
--  write content
-+  if content is unchanged
-+    return cached result
-+  write new content
-+  invalidate cache
-```
-
-- Show the whole block when most of it is new, when omitted context would hide ownership or order, or when the user needs a copyable target shape:
-
-```ts
-function expandSkill(command: string): string {
-  const skillName = command.slice(1);
-  return `use the ${skillName} skill`;
-}
-```
-
-#### Guidance
-
-Place each visual next to the short text it supports. Keep only the calls, files, props, states, and boundaries needed to answer the user's current question or the options to resolve the current discussion point.
-
-You may use one of these, you may use several, it is unlikely you will use all of them. Use your judgement and don't overwhelm the user.
-
-### Evidence
-
-Concrete evidence that the change works. Show a before and after.
-
-Screenshots are S-tier - when the environment is set up for it and the change is visual.
-
-Execution-based evidence is A-tier. Test results, console output. Show the exact test that now fails and passes, using pseudocode.
-
-### Merge Danger
-
-Describe whether it's a one-way or two-way door. You can walk back through two-way doors, but not one-way doors. A PR that is cheap to roll back is lower risk. Changes that involve destructive actions or hard-to-reverse decisions are one-way doors.
-
-The blast radius is the potential impact or scope of the changes introduced by this PR. Consider all possibilities. Examples are layout shift, breakages for consumers, mobile responsiveness, etc.
+- List the checks performed against the result being described, including manual observations. Identify the checked revision or working tree. Distinguish current evidence from earlier runs, skipped or unavailable checks, and proposed checks. Tie claims to the issue or spec and the behavior each check exercised.
+- For a bug fix, show an observed before-and-after result when available. If a test's expected behavior changed, identify the requirement that changed it. For a visible change, use real screenshots or recordings when they demonstrate the outcome.
+- Record how material review findings were resolved. Keep deferred findings, open questions, and remaining uncertainty visible.
+- Follow any project rules for owner checks. Mark a required action complete only when the owner's result is recorded. Report verification, owner acceptance, and merge authorization as separate facts when applicable.
+- Link to accessible GitHub issues, checked code revisions, CI runs, and evidence when available. Keep owner actions and material limitations visible outside disclosures.
