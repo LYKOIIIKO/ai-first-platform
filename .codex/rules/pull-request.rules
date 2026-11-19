@@ -1,0 +1,14 @@
+prefix_rule(
+    pattern = [["gh", "gh.exe"], "pr", "merge"],
+    decision = "forbidden",
+    justification = "Only the project owner may merge pull requests or enable auto-merge. Hand the pull request to the owner.",
+    match = [
+        "gh pr merge 123",
+        "gh pr merge 123 --auto",
+        "gh.exe pr merge 123",
+    ],
+    not_match = [
+        "gh pr create",
+        "gh pr view 123",
+    ],
+)

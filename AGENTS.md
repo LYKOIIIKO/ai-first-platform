@@ -8,3 +8,4 @@
 - Права GitHub. При работе над расчётом, выдачей, отзывом или сверкой прав на репозитории прочитай [ADR об ответственности модулей](docs/adr/0001-access-and-github-permissions.md) и [интерфейс сверки](docs/design/github-access-reconciliation.md).
 - Скиллы проекта находятся в [`.agents/skills/`](.agents/skills/).
 - Задачи ведутся в GitHub Issues. Для работы с ними используй [правила трекера](docs/agents/issue-tracker.md).
+- Pull Request сливает только владелец проекта. Агенту запрещено сливать Pull Request и включать автослияние. Когда PR готов, передай его владельцу.
