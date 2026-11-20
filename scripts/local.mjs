@@ -22,19 +22,27 @@ function exitCode(child) {
   });
 }
 
-async function composeUp(services = []) {
-  const args = ['compose', 'up', '--wait', '--wait-timeout', waitTimeout, ...services];
-  if (await exitCode(start('docker', args)) !== 0) {
+async function composeUp(args) {
+  if (await exitCode(start('docker', ['compose', 'up', '--wait', '--wait-timeout', waitTimeout, ...args])) !== 0) {
     throw new Error('Docker Compose не подтвердил готовность стека.');
   }
 }
 
 async function checkReady() {
-  for (const path of ['/system', '/api/health/ready']) {
+  async function get(path) {
     const url = new URL(path, `http://127.0.0.1:${webPort}`);
-    const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    const response = await fetch(url, { signal: AbortSignal.timeout(5000) }).catch((cause) => {
+      throw new Error(`Не удалось получить ответ от ${url}.`, { cause });
+    });
     if (response.status !== 200) throw new Error(`${url} вернул HTTP ${response.status}.`);
-    await response.body?.cancel();
+    return response;
+  }
+  const page = await get('/system');
+  await page.body?.cancel();
+  const ready = await get('/api/health/ready');
+  const dependencies = await ready.json().catch(() => null);
+  if (dependencies?.postgres !== 'ready' || dependencies?.rabbitmq !== 'ready') {
+    throw new Error('Прокси web не вернул ожидаемый ответ /api/health/ready.');
   }
   console.log('Web и API через прокси готовы.');
 }
@@ -83,7 +91,7 @@ try {
       await checkReady();
       break;
     case 'smoke':
-      await composeUp();
+      await composeUp(['--build']);
       await checkReady();
       break;
     case 'dev':

@@ -1,15 +1,15 @@
 import { Controller, Get, Inject, Res } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { Readiness } from './readiness';
-import { readinessRoute } from './ready.contract';
+import { livenessRoute, readinessRoute } from './health.contract';
 
 @Controller()
 export class HealthController {
   constructor(@Inject(Readiness) private readonly readiness: Readiness) {}
 
-  @Get('/health/live')
+  @Get(livenessRoute.path)
   live() {
-    return { status: 'alive' };
+    return livenessRoute.responses[200].schema.parse({ status: 'alive' });
   }
 
   @Get(readinessRoute.path)
