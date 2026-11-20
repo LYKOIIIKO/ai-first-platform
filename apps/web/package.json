@@ -1,0 +1,28 @@
+{
+  "name": "@platform/web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "routes:generate": "tsr generate",
+    "typecheck": "pnpm routes:generate && tsc --noEmit",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.90.7",
+    "@tanstack/react-router": "1.170.46",
+    "openapi-fetch": "0.15.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@tanstack/router-cli": "1.168.0",
+    "@tanstack/router-plugin": "1.169.0",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@vitejs/plugin-react": "5.1.0",
+    "typescript": "5.9.3",
+    "vite": "7.2.2"
+  }
+}

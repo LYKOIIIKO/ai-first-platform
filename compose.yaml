@@ -1,0 +1,133 @@
+services:
+  db:
+    image: postgres:18.3
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 3s
+      timeout: 2s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:4.2.5
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:?Set RABBITMQ_DEFAULT_USER in .env}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:?Set RABBITMQ_DEFAULT_PASS in .env}
+    ports:
+      - "127.0.0.1:${RABBITMQ_PORT:-5672}:5672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      target: api
+    init: true
+    environment:
+      API_HOST: 0.0.0.0
+      API_PORT: 3000
+      PGHOST: db
+      PGPORT: 5432
+      PGDATABASE: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
+      PGUSER: ${API_POSTGRES_USER:-${POSTGRES_USER}}
+      PGPASSWORD: ${API_POSTGRES_PASSWORD:-${POSTGRES_PASSWORD}}
+      AMQP_HOST: rabbitmq
+      AMQP_PORT: 5672
+      AMQP_USER: ${API_RABBITMQ_USER:-${RABBITMQ_DEFAULT_USER}}
+      AMQP_PASSWORD: ${API_RABBITMQ_PASSWORD:-${RABBITMQ_DEFAULT_PASS}}
+    ports:
+      - "127.0.0.1:${API_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health/ready').then(r => process.exit(r.status === 200 ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 3s
+      timeout: 4s
+      retries: 15
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/api/src
+          target: /workspace/apps/api/src
+          initial_sync: true
+        - action: sync+restart
+          path: ./apps/api/tsconfig.json
+          target: /workspace/apps/api/tsconfig.json
+        - action: rebuild
+          path: ./package.json
+        - action: rebuild
+          path: ./pnpm-workspace.yaml
+        - action: rebuild
+          path: ./pnpm-lock.yaml
+        - action: rebuild
+          path: ./Dockerfile
+        - action: rebuild
+          path: ./apps/api/package.json
+        - action: rebuild
+          path: ./apps/web/package.json
+
+  web:
+    build:
+      context: .
+      target: web
+    init: true
+    environment:
+      WEB_HOST: 0.0.0.0
+      WEB_PORT: 5173
+      API_PROXY_TARGET: ${WEB_API_PROXY_TARGET:-http://api:3000}
+    ports:
+      - "127.0.0.1:${WEB_PORT:-5173}:5173"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5173/system').then(r => process.exit(r.status === 200 ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 3s
+      timeout: 4s
+      retries: 15
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/web/src
+          target: /workspace/apps/web/src
+          initial_sync: true
+          ignore:
+            - app/routeTree.gen.ts
+        - action: sync
+          path: ./apps/web/index.html
+          target: /workspace/apps/web/index.html
+        - action: rebuild
+          path: ./package.json
+        - action: rebuild
+          path: ./pnpm-workspace.yaml
+        - action: rebuild
+          path: ./pnpm-lock.yaml
+        - action: rebuild
+          path: ./Dockerfile
+        - action: rebuild
+          path: ./apps/api/package.json
+        - action: rebuild
+          path: ./apps/web/package.json
+        - action: rebuild
+          path: ./apps/web/vite.config.ts
+        - action: rebuild
+          path: ./apps/web/tsconfig.json
+        - action: rebuild
+          path: ./apps/web/tsr.config.json
+
+volumes:
+  postgres-data:
+  rabbitmq-data:

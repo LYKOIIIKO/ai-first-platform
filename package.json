@@ -1,0 +1,25 @@
+{
+  "name": "ai-first-platform",
+  "private": true,
+  "packageManager": "pnpm@12.22.0",
+  "engines": { "node": "24.x", "pnpm": "12.x" },
+  "scripts": {
+    "dev": "node scripts/local.mjs dev",
+    "smoke": "node scripts/local.mjs smoke",
+    "check:ready": "node scripts/local.mjs check:ready",
+    "contract:generate": "node scripts/http-contract.mjs",
+    "contract:check": "node scripts/http-contract.mjs --check",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint apps scripts",
+    "check:architecture": "depcruise --config .dependency-cruiser.cjs apps/api/src apps/web/src",
+    "check": "pnpm typecheck && pnpm lint && pnpm check:architecture && pnpm contract:check",
+    "test": "node --test scripts/*.test.mjs"
+  },
+  "devDependencies": {
+    "dependency-cruiser": "18.8.0",
+    "eslint": "9.39.5",
+    "openapi-typescript": "7.10.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.73.0"
+  }
+}

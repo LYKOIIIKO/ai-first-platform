@@ -1,0 +1,102 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AI-first Platform API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health/ready": {
+      "get": {
+        "operationId": "checkReadiness",
+        "responses": {
+          "200": {
+            "description": "Both dependencies are ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "postgres": {
+                      "type": "string",
+                      "enum": [
+                        "ready"
+                      ]
+                    },
+                    "rabbitmq": {
+                      "type": "string",
+                      "enum": [
+                        "ready"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "postgres",
+                    "rabbitmq"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "postgres": {
+                          "type": "string",
+                          "enum": [
+                            "unavailable"
+                          ]
+                        },
+                        "rabbitmq": {
+                          "type": "string",
+                          "enum": [
+                            "ready",
+                            "unavailable"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "postgres",
+                        "rabbitmq"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "postgres": {
+                          "type": "string",
+                          "enum": [
+                            "ready",
+                            "unavailable"
+                          ]
+                        },
+                        "rabbitmq": {
+                          "type": "string",
+                          "enum": [
+                            "unavailable"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "postgres",
+                        "rabbitmq"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
