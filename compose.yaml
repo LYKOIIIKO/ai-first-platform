@@ -79,8 +79,6 @@ services:
           path: ./Dockerfile
         - action: rebuild
           path: ./apps/api/package.json
-        - action: rebuild
-          path: ./apps/web/package.json
 
   web:
     build:
@@ -117,8 +115,6 @@ services:
           path: ./pnpm-lock.yaml
         - action: rebuild
           path: ./Dockerfile
-        - action: rebuild
-          path: ./apps/api/package.json
         - action: rebuild
           path: ./apps/web/package.json
         - action: rebuild

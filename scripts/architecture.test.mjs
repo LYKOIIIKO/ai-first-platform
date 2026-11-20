@@ -50,7 +50,8 @@ test('checks resolved type imports, entry points, layers and cycles', (context) 
   assert.equal(clean.status, 0, clean.output);
 
   write(`${api}/modules/access/internal.ts`, [
-    "export type { InternalEmployee } from '@api/modules/employees/private';",
+    "import type { InternalEmployee } from '@api/modules/employees/private';",
+    "export type RestrictedEmployee = InternalEmployee;",
     "export { EmployeesModule } from '@api/modules/employees/employees.module';",
     "export { cycle } from './cycle';",
   ].join('\n'));
