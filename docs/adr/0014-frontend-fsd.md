@@ -10,6 +10,8 @@ Frontend в apps/web организуется по Feature-Sliced Design (FSD). 
 
 Внутренние сегменты, например ui, api и model, появляются по содержимому кода. Компромисс FSD — необходимость следовать правилам слоёв и поддерживать явные открытые экспорты. Направления импортов и открытые точки входа frontend учитываются при настройке выбранных dependency-cruiser и ESLint. Их конфигурация пока не создана.
 
+Файлы маршрутов TanStack Router располагаются в `app` и подключают страницы из `pages`. Переиспользуемые компоненты SmoothUI размещаются в `shared/ui`. [Стек frontend](0003-frontend-stack.md).
+
 Frontend взаимодействует с backend по HTTP и не импортирует исходники apps/api, включая описания таблиц Drizzle. FSD относится к frontend и не изменяет [согласованную структуру backend](0013-backend-layout.md). Пользовательские функции пока не реализуются.
 
 Источники: [слои FSD](https://feature-sliced.design/docs/reference/layers), [слайсы и сегменты](https://feature-sliced.design/docs/reference/slices-segments), [открытые точки входа](https://feature-sliced.design/docs/reference/public-api).
